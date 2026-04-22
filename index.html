@@ -3,157 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steel Pro - Weight Calculator</title>
+    <title>Steel Pro - Calculator & Share</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --success-color: #27ae60;
-            --danger-color: #e74c3c;
-            --light-bg: #f8f9fa;
+            --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; --bg: #f4f7f6;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #eef2f3;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        .dashboard {
-            max-width: 1100px;
-            margin: auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        /* Header */
-        .header {
-            background: var(--primary-color);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Summary Cards */
-        .summary-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            padding: 20px;
-            background: var(--light-bg);
-        }
-
-        .card {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 5px solid var(--accent-color);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .card h4 { margin: 0; color: #7f8c8d; font-size: 0.9rem; }
-        .card p { margin: 5px 0 0; font-size: 1.4rem; font-weight: bold; color: var(--primary-color); }
-
-        /* Form Styling */
-        .form-section {
-            padding: 25px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .input-group { display: flex; flex-direction: column; }
-        .input-group label { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #555; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .container { max-width: 1000px; margin: auto; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
         
-        input, select {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            outline: none;
-            transition: 0.3s;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; padding: 20px; background: #fafafa; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; border-bottom: 4px solid var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
+        .stat-card h4 { margin: 0; font-size: 0.8rem; color: #666; }
+        .stat-card p { margin: 5px 0 0; font-size: 1.2rem; font-weight: bold; color: var(--primary); }
 
-        input:focus, select:focus { border-color: var(--accent-color); }
+        .input-form { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; border-bottom: 1px solid #eee; }
+        .group { display: flex; flex-direction: column; }
+        label { font-size: 0.75rem; font-weight: bold; margin-bottom: 4px; color: #444; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
+        
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn-add { background: var(--success); color: white; margin-top: auto; }
+        .btn-share { background: var(--accent); color: white; }
+        .btn-download { background: var(--primary); color: white; }
 
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-add { background: var(--success-color); color: white; margin-top: auto; }
-        .btn-add:hover { background: #219150; }
-
-        /* Table Styling */
-        .table-container { padding: 20px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f4f7f8; color: #555; font-weight: 600; text-align: left; padding: 15px; border-bottom: 2px solid #eee; }
-        td { padding: 15px; border-bottom: 1px solid #eee; }
+        .table-box { padding: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #eee; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
         
         .actions { display: flex; gap: 10px; }
-        .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; }
-        .edit-icon { color: var(--accent-color); }
-        .delete-icon { color: var(--danger-color); }
-
-        /* PDF Footer */
-        .export-section {
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            background: var(--light-bg);
-        }
-
-        .btn-pdf { background: var(--primary-color); color: white; font-size: 0.85rem; }
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 1rem; }
+        
+        .export-zone { padding: 20px; background: #f9f9f9; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
+<div class="container">
     <div class="header">
-        <h2 style="margin:0"><i class="fas fa-industry"></i> Steel Pro Estimator</h2>
-        <button class="btn" style="background:#e74c3c; color:white;" onclick="clearAll()"><i class="fas fa-trash-alt"></i> Clear All</button>
+        <h2 style="margin:0"><i class="fas fa-balance-scale"></i> Steel Estimator Pro</h2>
     </div>
 
-    <div class="summary-container">
-        <div class="card">
-            <h4>Total Items</h4>
-            <p id="totalCount">0</p>
-        </div>
-        <div class="card" style="border-left-color: var(--success-color);">
-            <h4>Total Weight (Kg)</h4>
-            <p id="totalWeight">0.00</p>
-        </div>
-        <div class="card" style="border-left-color: #f1c40f;">
-            <h4>Active Category</h4>
-            <p id="activeCat">-</p>
-        </div>
+    <div class="stats-grid">
+        <div class="stat-card"><h4>Items</h4><p id="tCount">0</p></div>
+        <div class="stat-card" style="border-color: var(--success)"><h4>Total Weight</h4><p><span id="tWeight">0.00</span> kg</p></div>
     </div>
 
-    <div class="form-section">
-        <div class="input-group">
+    <div class="input-form">
+        <div class="group">
             <label>Category</label>
-            <select id="category" onchange="updateSubItems()">
+            <select id="cat" onchange="loadSizes()">
                 <option value="">Select</option>
                 <option value="Beams">Beams</option>
                 <option value="Channels">Channels</option>
@@ -162,58 +66,38 @@
                 <option value="Plates">Plates</option>
             </select>
         </div>
-        <div class="input-group">
-            <label>Material Size</label>
-            <select id="subItem">
-                <option value="">Select Category First</option>
-            </select>
+        <div class="group">
+            <label>Size</label>
+            <select id="size"><option value="">Select Category</option></select>
         </div>
-        <div class="input-group">
-            <label>Length (mm)</label>
-            <input type="number" id="length" placeholder="0">
-        </div>
-        <div class="input-group" id="widthGroup">
-            <label>Width (mm)</label>
-            <input type="number" id="width" placeholder="0">
-        </div>
-        <div class="input-group">
-            <label>Area (sq.m)</label>
-            <input type="number" id="area" placeholder="0.00">
-        </div>
-        <input type="hidden" id="editIndex" value="-1">
-        <button class="btn btn-add" onclick="saveData()">
-            <i class="fas fa-plus-circle"></i> <span id="btnText">Add Entry</span>
-        </button>
+        <div class="group"><label>Length (mm)</label><input type="number" id="len" placeholder="0"></div>
+        <div class="group"><label>Width (mm)</label><input type="number" id="wid" placeholder="0"></div>
+        <div class="group"><label>Area (sq.m)</label><input type="number" id="are" placeholder="0.0"></div>
+        <input type="hidden" id="editIdx" value="-1">
+        <button class="btn btn-add" onclick="saveItem()"><i class="fas fa-save"></i> <span id="btnLbl">Save</span></button>
     </div>
 
-    <div class="table-container">
+    <div class="table-box">
         <table>
             <thead>
                 <tr>
                     <th>Material</th>
-                    <th>Size</th>
-                    <th>Length (mm)</th>
-                    <th>Area (sq.m)</th>
-                    <th>Weight (kg)</th>
+                    <th>Weight</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="dataTable"></tbody>
+            <tbody id="list"></tbody>
         </table>
     </div>
 
-    <div class="export-section">
-        <button class="btn btn-pdf" onclick="exportPDF('Beams')"><i class="fas fa-file-pdf"></i> Beams Report</button>
-        <button class="btn btn-pdf" onclick="exportPDF('Channels')"><i class="fas fa-file-pdf"></i> Channels Report</button>
-        <button class="btn btn-pdf" onclick="exportPDF('Angles')"><i class="fas fa-file-pdf"></i> Angles Report</button>
-        <button class="btn btn-pdf" onclick="exportPDF('Flats')"><i class="fas fa-file-pdf"></i> Flats Report</button>
-        <button class="btn btn-pdf" onclick="exportPDF('Plates')"><i class="fas fa-file-pdf"></i> Plates Report</button>
-        <button class="btn btn-pdf" style="background:#27ae60" onclick="exportPDF('ALL')"><i class="fas fa-file-invoice"></i> All Items Report</button>
+    <div class="export-zone">
+        <button class="btn btn-share" onclick="handlePDF('ALL', 'share')"><i class="fas fa-share-nodes"></i> Share Full Report</button>
+        <button class="btn btn-download" onclick="handlePDF('ALL', 'download')"><i class="fas fa-file-pdf"></i> Download All</button>
     </div>
 </div>
 
 <script>
-    const materialData = {
+    const dataRef = {
         "Beams": { "ISMB 300": 46 },
         "Channels": { "ISMC 200": 22.3, "ISMC 150": 16.8, "ISMC 125": 13.1 },
         "Angles": { "ISA 130": 19.7, "ISA 100": 14.9, "ISA 75": 11, "ISA 50": 4.5 },
@@ -221,152 +105,118 @@
         "Plates": { "10mm Plate": 78.5, "CH Plate": 53.2 }
     };
 
-    let entries = JSON.parse(localStorage.getItem("steelDataPro")) || [];
+    let items = JSON.parse(localStorage.getItem("steel_items")) || [];
 
-    function updateSubItems() {
-        const cat = document.getElementById("category").value;
-        const subSelect = document.getElementById("subItem");
-        document.getElementById("activeCat").innerText = cat || "-";
+    function loadSizes() {
+        const c = document.getElementById("cat").value;
+        const s = document.getElementById("size");
+        s.innerHTML = '<option value="">Select Size</option>';
+        if (c) Object.keys(dataRef[c]).forEach(k => s.innerHTML += `<option value="${k}">${k}</option>`);
+    }
+
+    function saveItem() {
+        const c = document.getElementById("cat").value;
+        const sz = document.getElementById("size").value;
+        const l = parseFloat(document.getElementById("len").value) || 0;
+        const w = parseFloat(document.getElementById("wid").value) || 0;
+        const a = parseFloat(document.getElementById("are").value) || 0;
+        const idx = parseInt(document.getElementById("editIdx").value);
+
+        if(!c || !sz) return alert("ദയവായി വിവരങ്ങൾ നൽകുക");
+
+        const uw = dataRef[c][sz];
+        const wt = (c === "Plates") ? (a > 0 ? a * uw : (l * w / 1000000) * uw) : (l / 1000) * uw;
         
-        subSelect.innerHTML = '<option value="">Select Size</option>';
-        if (cat && materialData[cat]) {
-            Object.keys(materialData[cat]).forEach(item => {
-                subSelect.innerHTML += `<option value="${item}">${item}</option>`;
-            });
-        }
+        const obj = { c, sz, l, w, a, wt: wt.toFixed(2) };
+        if(idx === -1) items.push(obj); else items[idx] = obj;
+
+        localStorage.setItem("steel_items", JSON.stringify(items));
+        resetForm();
+        refresh();
     }
 
-    function saveData() {
-        const cat = document.getElementById("category").value;
-        const item = document.getElementById("subItem").value;
-        const length = parseFloat(document.getElementById("length").value) || 0;
-        const width = parseFloat(document.getElementById("width").value) || 0;
-        const area = parseFloat(document.getElementById("area").value) || 0;
-        const editIndex = parseInt(document.getElementById("editIndex").value);
-
-        if (!cat || !item) {
-            alert("ദയവായി കാറ്റഗറിയും സൈസും തിരഞ്ഞെടുക്കുക!");
-            return;
-        }
-
-        const unitWeight = materialData[cat][item];
-        let calculatedWeight = 0;
-
-        if (cat === "Plates") {
-            calculatedWeight = area > 0 ? area * unitWeight : ((length * width) / 1000000) * unitWeight;
-        } else {
-            calculatedWeight = (length / 1000) * unitWeight;
-        }
-
-        const entry = { cat, item, length, width, area, weight: calculatedWeight.toFixed(2) };
-
-        if (editIndex === -1) {
-            entries.push(entry);
-        } else {
-            entries[editIndex] = entry;
-            document.getElementById("editIndex").value = "-1";
-            document.getElementById("btnText").innerText = "Add Entry";
-        }
-
-        localStorage.setItem("steelDataPro", JSON.stringify(entries));
-        renderUI();
-        clearForm();
-    }
-
-    function renderUI() {
-        const tbody = document.getElementById("dataTable");
-        tbody.innerHTML = "";
-        let totalW = 0;
-
-        entries.forEach((e, i) => {
-            totalW += parseFloat(e.weight);
-            tbody.innerHTML += `
-                <tr>
-                    <td style="font-weight:600">${e.cat}</td>
-                    <td>${e.item}</td>
-                    <td>${e.length}</td>
-                    <td>${e.area || '-'}</td>
-                    <td style="color:var(--success-color); font-weight:600">${e.weight} kg</td>
-                    <td class="actions">
-                        <button class="btn-icon edit-icon" onclick="editEntry(${i})"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon delete-icon" onclick="deleteEntry(${i})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
+    function refresh() {
+        const lb = document.getElementById("list");
+        lb.innerHTML = "";
+        let total = 0;
+        items.forEach((item, i) => {
+            total += parseFloat(item.wt);
+            lb.innerHTML += `<tr>
+                <td><strong>${item.sz}</strong><br><small>${item.c} | L: ${item.l}mm</small></td>
+                <td>${item.wt} kg</td>
+                <td class="actions">
+                    <button class="action-btn" style="color:var(--accent)" onclick="edit(${i})"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn" style="color:var(--danger)" onclick="del(${i})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
         });
-
-        document.getElementById("totalCount").innerText = entries.length;
-        document.getElementById("totalWeight").innerText = totalW.toFixed(2);
+        document.getElementById("tCount").innerText = items.length;
+        document.getElementById("tWeight").innerText = total.toFixed(2);
     }
 
-    function editEntry(i) {
-        const e = entries[i];
-        document.getElementById("category").value = e.cat;
-        updateSubItems();
-        document.getElementById("subItem").value = e.item;
-        document.getElementById("length").value = e.length;
-        document.getElementById("width").value = e.width;
-        document.getElementById("area").value = e.area;
-        document.getElementById("editIndex").value = i;
-        document.getElementById("btnText").innerText = "Update Entry";
-        window.scrollTo({top: 0, behavior: 'smooth'});
+    function edit(i) {
+        const itm = items[i];
+        document.getElementById("cat").value = itm.c;
+        loadSizes();
+        document.getElementById("size").value = itm.sz;
+        document.getElementById("len").value = itm.l;
+        document.getElementById("wid").value = itm.w;
+        document.getElementById("are").value = itm.a;
+        document.getElementById("editIdx").value = i;
+        document.getElementById("btnLbl").innerText = "Update";
     }
 
-    function deleteEntry(i) {
-        if(confirm("ഈ എൻട്രി നീക്കം ചെയ്യണമോ?")) {
-            entries.splice(i, 1);
-            localStorage.setItem("steelDataPro", JSON.stringify(entries));
-            renderUI();
-        }
+    function del(i) { if(confirm("Delete ചെയ്യണോ?")) { items.splice(i,1); localStorage.setItem("steel_items", JSON.stringify(items)); refresh(); } }
+
+    function resetForm() {
+        document.getElementById("editIdx").value = "-1";
+        document.getElementById("btnLbl").innerText = "Save";
+        document.getElementById("len").value = ""; document.getElementById("wid").value = ""; document.getElementById("are").value = "";
     }
 
-    function clearAll() {
-        if(confirm("മുഴുവൻ ഡാറ്റയും ഡിലീറ്റ് ചെയ്യണമോ?")) {
-            entries = [];
-            localStorage.removeItem("steelDataPro");
-            renderUI();
-        }
-    }
-
-    function clearForm() {
-        document.getElementById("length").value = "";
-        document.getElementById("width").value = "";
-        document.getElementById("area").value = "";
-    }
-
-    function exportPDF(category) {
+    async function handlePDF(type, mode) {
+        if(items.length === 0) return alert("ലിസ്റ്റിൽ ഡാറ്റ ഇല്ല!");
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
-        const filtered = category === 'ALL' ? entries : entries.filter(e => e.cat === category);
-        if (filtered.length === 0) return alert("ഡാറ്റ ലഭ്യമല്ല!");
+        doc.setFontSize(16);
+        doc.text("Steel Material Estimate Report", 14, 20);
+        doc.setFontSize(10);
+        doc.text(`Date: ${new Date().toLocaleString()}`, 14, 28);
 
-        // PDF Styling
-        doc.setFontSize(18);
-        doc.text("Steel Material Report", 14, 20);
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Category: ${category} | Date: ${new Date().toLocaleDateString()}`, 14, 28);
-
-        const rows = filtered.map(e => [e.cat, e.item, e.length, e.area, e.weight + " kg"]);
-        
+        const rows = items.map(it => [it.c, it.sz, it.l, it.wt + " kg"]);
         doc.autoTable({
-            head: [['Category', 'Material Size', 'Length (mm)', 'Area', 'Weight']],
+            head: [['Category', 'Size', 'Length', 'Weight']],
             body: rows,
             startY: 35,
-            theme: 'striped',
+            theme: 'grid',
             headStyles: { fillColor: [44, 62, 80] }
         });
 
-        const finalY = doc.lastAutoTable.finalY + 10;
-        const total = filtered.reduce((sum, e) => sum + parseFloat(e.weight), 0);
-        doc.setFontSize(12);
-        doc.text(`Grand Total Weight: ${total.toFixed(2)} kg`, 14, finalY);
+        const total = items.reduce((s, it) => s + parseFloat(it.wt), 0);
+        doc.text(`Grand Total: ${total.toFixed(2)} kg`, 14, doc.lastAutoTable.finalY + 10);
 
-        doc.save(`Steel_Report_${category}.pdf`);
+        if(mode === 'share') {
+            const blob = doc.output('blob');
+            const file = new File([blob], "Steel_Estimate.pdf", { type: "application/pdf" });
+            
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Steel Estimate',
+                        text: 'Sharing the steel weight estimation report.'
+                    });
+                } catch (e) { console.error("Sharing failed", e); }
+            } else {
+                alert("ഈ ബ്രൗസറിൽ ഷെയറിങ് സപ്പോർട്ട് ചെയ്യുന്നില്ല. ഡൗൺലോഡ് ഉപയോഗിക്കുക.");
+            }
+        } else {
+            doc.save("Steel_Estimate.pdf");
+        }
     }
 
-    renderUI();
+    refresh();
 </script>
-
 </body>
 </html>
