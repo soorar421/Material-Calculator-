@@ -303,15 +303,25 @@
 
         const materialSummary = {};
         window.pdfMaterials.forEach(m => {
-            if (!materialSummary[m.name]) materialSummary[m.name] = { totalWeight: 0, totalQty: 0 };
+            if (!materialSummary[m.name]) materialSummary[m.name] = { totalWeight: 0 };
             materialSummary[m.name].totalWeight += m.weight;
-            materialSummary[m.name].totalQty += parseFloat(m.qty);
         });
         
-        const summaryBody = Object.keys(materialSummary).sort().map(name => [name, materialSummary[name].totalQty, materialSummary[name].totalWeight.toFixed(2) + " kg"]);
+        // Removed Quantity column from the summary mapping below
+        const summaryBody = Object.keys(materialSummary).sort().map(name => [name, materialSummary[name].totalWeight.toFixed(2) + " kg"]);
+        
         if(yPos > 220) { doc.addPage(); yPos = 20; }
         doc.setFontSize(14); doc.setTextColor(26, 115, 232); doc.text("MATERIAL SUMMARY (TOTALS)", 14, yPos);
-        doc.autoTable({ startY: yPos + 4, head: [['Material Name', 'Total Quantity', 'Total Weight']], body: summaryBody, theme: 'grid', headStyles: { fillColor: [21, 101, 192] }, styles: { fontSize: 9, fontStyle: 'bold' } });
+        
+        // Updated header to exclude 'Total Quantity'
+        doc.autoTable({ 
+            startY: yPos + 4, 
+            head: [['Material Name', 'Total Weight']], 
+            body: summaryBody, 
+            theme: 'grid', 
+            headStyles: { fillColor: [21, 101, 192] }, 
+            styles: { fontSize: 9, fontStyle: 'bold' } 
+        });
         
         doc.save(site + "_Material_Log.pdf");
     }
