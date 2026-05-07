@@ -1,14 +1,20 @@
 {
-  "name": "GS Material Manager",
+  "name": "GS Material Manager Pro",
   "short_name": "GS Material",
-  "start_url": "./index.html",
+  "description": "Professional Material Tracking App for GS Constructions",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1a73e8",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "https://raw.githubusercontent.com/soorajrmaranadu/GS-Construction/main/icon-192.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/soorajrmaranadu/GS-Construction/main/icon-512.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
