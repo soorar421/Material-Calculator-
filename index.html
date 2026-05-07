@@ -373,6 +373,23 @@ function updateSite(){
     localStorage.setItem('site_name',val);
 }
 
+function formatDate(dateStr){
+
+    const months = [
+        "January","February","March","April",
+        "May","June","July","August",
+        "September","October","November","December"
+    ];
+
+    const parts = dateStr.split("-");
+
+    const year = parts[0];
+    const month = months[parseInt(parts[1]) - 1];
+    const day = parts[2];
+
+    return `${day} ${month} ${year}`;
+}
+
 function togglePlate(){
 
     const sel = document.getElementById('mat-type');
@@ -546,7 +563,7 @@ function renderMaterials(){
             <td>
             <strong>${m.name}</strong><br>
             ${m.direction}<br>
-            <small>${m.date}</small>
+            <small>${formatDate(m.date)}</small>
             </td>
 
             <td>
@@ -611,7 +628,7 @@ function generatePDF(){
         }
 
         grouped[m.area].push([
-            m.date,
+            formatDate(m.date),
             m.direction,
             m.name,
             m.size,
