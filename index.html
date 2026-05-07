@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GS Material Manager</title>
+<title>Gs Material Manager</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a73e8">
@@ -100,6 +100,11 @@ button{
 
 .btn{
     background:var(--primary);
+    color:white;
+}
+
+.btn-red{
+    background:var(--danger);
     color:white;
 }
 
@@ -231,7 +236,7 @@ img.preview{
 
 <div class="flex">
     <input type="text" id="mat-area" placeholder="Area Name">
-
+    
     <select id="mat-direction">
         <option value="">Direction</option>
         <option>North</option>
@@ -311,7 +316,7 @@ Designed by soorajrmaranadu
 
 <script>
 
-if('serviceWorker' in navigator'){
+if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js');
 }
 
@@ -378,7 +383,11 @@ function formatDate(dateStr){
 
     const parts = dateStr.split("-");
 
-    return `${parts[2]} ${months[parseInt(parts[1])-1]} ${parts[0]}`;
+    const year = parts[0];
+    const month = months[parseInt(parts[1]) - 1];
+    const day = parts[2];
+
+    return `${day} ${month} ${year}`;
 }
 
 function togglePlate(){
@@ -530,7 +539,9 @@ function renderMaterials(){
     Object.keys(grouped).sort().forEach(area=>{
 
         html += `
-        <div class="area-badge">${area}</div>
+        <div class="area-badge">
+            ${area}
+        </div>
 
         <table>
         <thead>
@@ -582,32 +593,7 @@ function renderMaterials(){
     document.getElementById('material-list').innerHTML = html;
 }
 
-async function getBase64Image(url){
-
-    try{
-
-        const response = await fetch(url);
-        const blob = await response.blob();
-
-        return await new Promise((resolve)=>{
-
-            const reader = new FileReader();
-
-            reader.onloadend = ()=>{
-                resolve(reader.result);
-            };
-
-            reader.readAsDataURL(blob);
-
-        });
-
-    }catch(err){
-
-        return null;
-    }
-}
-
-async function generatePDF(){
+function generatePDF(){
 
     if(materials.length===0){
         alert("No Data");
@@ -641,29 +627,20 @@ async function generatePDF(){
             grouped[m.area] = [];
         }
 
-        grouped[m.area].push(m);
+        grouped[m.area].push([
+            formatDate(m.date),
+            m.direction,
+            m.name,
+            m.size,
+            m.qty,
+            m.weight + " KG"
+        ]);
     });
 
-    for(const area of Object.keys(grouped)){
+    Object.keys(grouped).forEach(area=>{
 
         doc.setFontSize(13);
         doc.text("AREA : " + area,14,y);
-
-        const body = [];
-
-        grouped[area].forEach(m=>{
-
-            body.push([
-                formatDate(m.date),
-                m.direction,
-                m.name,
-                m.size,
-                m.qty,
-                m.weight + " KG",
-                ""
-            ]);
-
-        });
 
         doc.autoTable({
 
@@ -675,69 +652,22 @@ async function generatePDF(){
                 'Material',
                 'Size',
                 'Qty',
-                'Weight',
-                'Photo'
+                'Weight'
             ]],
 
-            body:body,
+            body:grouped[area],
 
             theme:'grid',
 
             headStyles:{
                 fillColor:[26,115,232]
-            },
-
-            styles:{
-                minCellHeight:25
-            },
-
-            columnStyles:{
-                6:{cellWidth:28}
-            },
-
-            didDrawCell: async function(data){
-
-                if(
-                    data.section === 'body' &&
-                    data.column.index === 6
-                ){
-
-                    const row =
-                    grouped[area][data.row.index];
-
-                    if(row.photo){
-
-                        try{
-
-                            const imgData =
-                            await getBase64Image(row.photo);
-
-                            if(imgData){
-
-                                doc.addImage(
-                                    imgData,
-                                    'JPEG',
-                                    data.cell.x + 2,
-                                    data.cell.y + 2,
-                                    22,
-                                    18
-                                );
-                            }
-
-                        }catch(e){}
-                    }
-                }
             }
 
         });
 
         y = doc.lastAutoTable.finalY + 15;
 
-        if(y > 250){
-            doc.addPage();
-            y = 20;
-        }
-    }
+    });
 
     doc.setFontSize(14);
 
