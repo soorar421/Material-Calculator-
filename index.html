@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Material Log Manager</title>
     
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="MatManager">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
+
     <style>
         :root { --primary: #1a73e8; --danger: #d93025; --dark: #202124; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; margin: 0; padding: 10px; min-height: 100vh; display: flex; flex-direction: column; }
@@ -36,7 +41,6 @@
         .hidden { display: none; }
         .flex-row { display: flex; gap: 10px; align-items: center; }
         .footer-credit { text-align: center; padding: 20px; font-size: 12px; color: #70757a; font-weight: bold; letter-spacing: 1px; }
-        .photo-link { color: #1a73e8; text-decoration: none; font-size: 11px; font-weight: bold; display: block; margin-top: 5px; }
         #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -78,9 +82,9 @@
             <input type="date" id="mat-date">
             
             <div class="flex-row">
-                <input type="text" id="mat-area" placeholder="Area Name (eg: Area A)">
+                <input type="text" id="mat-area" placeholder="Area Name">
                 <select id="mat-direction">
-                    <option value="">Select Direction</option>
+                    <option value="">Direction</option>
                     <option value="North">North</option>
                     <option value="South">South</option>
                     <option value="East">East</option>
@@ -90,7 +94,7 @@
             </div>
             
             <div style="background: #f1f3f4; padding: 10px; border-radius: 10px; margin-bottom: 8px;">
-                <label style="font-size: 12px; color: #5f6368; font-weight: bold; display: block; margin-bottom: 5px;"><i class="fas fa-camera"></i> Attach Material Photo (Optional)</label>
+                <label style="font-size: 12px; color: #5f6368; font-weight: bold; display: block; margin-bottom: 5px;"><i class="fas fa-camera"></i> Material Photo</label>
                 <input type="file" id="mat-photo" accept="image/*" style="padding: 5px; font-size: 12px; background: white;">
             </div>
 
@@ -101,17 +105,11 @@
                 <optgroup label="Channels">
                     <option value="22.3" data-type="linear">ISMC 200 (22.3 kg/m)</option>
                     <option value="16.8" data-type="linear">ISMC 150 (16.8 kg/m)</option>
-                    <option value="13.1" data-type="linear">ISMC 125 (13.1 kg/m)</option>
                 </optgroup>
                 <optgroup label="Angles">
                     <option value="19.7" data-type="linear">ISA 130 (19.7 kg/m)</option>
                     <option value="14.9" data-type="linear">ISA 100 (14.9 kg/m)</option>
                     <option value="11" data-type="linear">ISA 75 (11 kg/m)</option>
-                    <option value="4.5" data-type="linear">ISA 50 (4.5 kg/m)</option>
-                </optgroup>
-                <optgroup label="Flats">
-                    <option value="4.7" data-type="linear">ISF 100 (4.7 kg/m)</option>
-                    <option value="1.5" data-type="linear">ISF 32 (1.5 kg/m)</option>
                 </optgroup>
                 <optgroup label="Plates">
                     <option value="78.5" data-type="plate">10mm Plate (78.5 kg/sq.m)</option>
@@ -121,20 +119,37 @@
             <div id="plate-width-div" class="hidden"><input type="number" id="mat-width" placeholder="Width in MM"></div>
             <div class="flex-row">
                 <input type="number" id="mat-length" placeholder="Length in MM">
-                <input type="number" id="mat-qty" placeholder="Quantity" value="1">
+                <input type="number" id="mat-qty" placeholder="Qty" value="1">
             </div>
             <button id="mat-action-btn" class="btn-main" onclick="processMaterial()"><i class="fas fa-plus-circle"></i> Save Material</button>
             
             <div id="mat-grouped-display" style="margin-top: 15px;"></div>
             
-            <button class="btn-main" onclick="generateMaterialPDF()" style="margin-top: 15px; font-size: 13px; height: 40px; background: var(--dark);"><i class="fas fa-file-pdf"></i> Export Material PDF Report</button>
+            <button class="btn-main" onclick="generateMaterialPDF()" style="margin-top: 15px; font-size: 13px; height: 40px; background: var(--dark);"><i class="fas fa-file-pdf"></i> Export Material PDF</button>
         </div>
     </div>
 </div>
 
-<div class="footer-credit"><i class="fas fa-code"></i> Developed for Material Management</div>
+<div class="footer-credit">© 2026 Material Manager - Optimized for Mobile</div>
 
 <script>
+    // --- PWA SERVICE WORKER REGISTRATION ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            const swCode = `
+                self.addEventListener('install', (e) => {
+                    e.waitUntil(caches.open('mat-log-v1').then((c) => c.addAll(['/', './'])));
+                });
+                self.addEventListener('fetch', (e) => {
+                    e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        });
+    }
+
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyDRDLw2bE_iG7OuE6diCGtrLmDePZStKr8",
         authDomain: "gsconstructions-3f4c9.firebaseapp.com",
@@ -161,7 +176,7 @@
         if (user) {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('user-display').innerText = "Active User: " + user.displayName;
+            document.getElementById('user-display').innerText = user.displayName;
             document.getElementById('mat-date').value = new Date().toISOString().split('T')[0];
             refreshUI();
         }
@@ -177,7 +192,7 @@
             document.getElementById('loading-overlay').style.display = 'none';
             return result.data.url;
         } catch (error) {
-            alert("Photo upload failed!");
+            alert("Upload failed!");
             document.getElementById('loading-overlay').style.display = 'none';
             return null;
         }
@@ -185,14 +200,14 @@
 
     async function processMaterial() {
         const date = document.getElementById('mat-date').value;
-        const area = document.getElementById('mat-area').value || "General Area";
+        const area = document.getElementById('mat-area').value || "General";
         const dir = document.getElementById('mat-direction').value;
         const sel = document.getElementById('mat-type');
         const length = parseFloat(document.getElementById('mat-length').value);
         const qty = parseFloat(document.getElementById('mat-qty').value) || 1;
         const photoFile = document.getElementById('mat-photo').files[0];
 
-        if(!length || !date) return alert("Fill all mandatory fields (Date, Length)");
+        if(!length || !date) return alert("Fill mandatory fields!");
 
         let photoUrl = "";
         if(photoFile) photoUrl = await uploadToImgBB(photoFile);
@@ -200,7 +215,7 @@
         let unitWeight = 0, sizeText = "";
         if(sel.options[sel.selectedIndex].getAttribute('data-type') === 'plate') {
             const width = parseFloat(document.getElementById('mat-width').value);
-            if(!width) return alert("Enter width for the plate");
+            if(!width) return alert("Enter width!");
             unitWeight = ((length/1000)*(width/1000)*parseFloat(sel.value));
             sizeText = length + "x" + width + "mm";
         } else {
@@ -215,7 +230,6 @@
             if (!photoFile) delete data.photoUrl; 
             await db.collection('materials').doc(currentEditMatId).update(data);
             currentEditMatId = null;
-            document.getElementById('mat-action-btn').innerHTML = '<i class="fas fa-plus-circle"></i> Save Material';
         } else { await db.collection('materials').add(data); }
 
         document.getElementById('mat-length').value = ""; document.getElementById('mat-width').value = ""; document.getElementById('mat-qty').value = "1"; document.getElementById('mat-photo').value = "";
@@ -228,7 +242,7 @@
         updateSiteName();
         window.pdfMaterials = [];
 
-        const mSnap = await db.collection('materials').where('uid', '==', uid).get();
+        const mSnap = await db.collection('materials').where('uid', '==', uid).orderBy('ts', 'desc').get();
         let totalW = 0, mAreaGroups = {};
         
         mSnap.forEach(doc => {
@@ -236,21 +250,16 @@
             if(!mAreaGroups[d.area]) mAreaGroups[d.area] = [];
             mAreaGroups[d.area].push({id: doc.id, ...d}); 
             totalW += d.weight;
-            window.pdfMaterials.push({ date: d.date, area: d.area, direction: d.direction || '-', name: d.name, size: d.size, qty: d.qty, weight: parseFloat(d.weight) });
+            window.pdfMaterials.push({ ...d });
         });
         
         let mHTML = '';
         Object.keys(mAreaGroups).sort().forEach(area => {
             mHTML += `<div class="area-badge"><i class="fas fa-map-marker-alt"></i> ${area}</div><table><tbody>`;
             mAreaGroups[area].forEach(d => {
-                const photoBtn = d.photoUrl ? `<a href="${d.photoUrl}" target="_blank" class="photo-link"><i class="fas fa-image"></i> View Photo</a>` : '';
-                let cleanSize = d.size.replace(/mm/g, '').trim();
-                const l = cleanSize.split('x')[0], w = cleanSize.split('x')[1] || "";
-                mHTML += `<tr><td><strong>${d.name}</strong><br><small>${d.direction || ''} (${formatToDisplayDate(d.date)})</small>${photoBtn}</td>
+                mHTML += `<tr><td><strong>${d.name}</strong><br><small>${d.direction || ''}</small></td>
                 <td>${d.size}<br>Qty: ${d.qty}</td><td>${d.weight} kg</td>
-                <td><div style="display:flex;gap:5px;">
-                <button class="btn-circle btn-main" onclick="editMatEntry('${d.id}','${d.area}','${d.direction}','${l}','${w}','${d.date}','${d.qty}','${d.name}')"><i class="fas fa-pencil-alt"></i></button>
-                <button class="btn-circle btn-red" onclick="removeDoc('materials','${d.id}')"><i class="fas fa-trash"></i></button></div></td></tr>`;
+                <td><button class="btn-circle btn-red" onclick="removeDoc('materials','${d.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
             }); mHTML += `</tbody></table>`;
         });
         
@@ -258,73 +267,50 @@
         document.getElementById('grand-total').innerText = totalW.toFixed(2) + " KG";
     }
 
-    function formatToDisplayDate(dateStr) { if(!dateStr) return ""; const [y, m, d] = dateStr.split('-'); return `${d}-${m}-${y}`; }
-    function togglePlateInput() { const isPlate = document.getElementById('mat-type').options[document.getElementById('mat-type').selectedIndex].getAttribute('data-type') === 'plate'; document.getElementById('plate-width-div').classList.toggle('hidden', !isPlate); }
     function updateSiteName() { const val = document.getElementById('site-name-input').value; document.getElementById('site-header-text').innerText = val || "NO SITE SELECTED"; localStorage.setItem('gs_pro_site', val); }
-    async function removeDoc(col, id) { if(confirm("Permanently delete this entry?")) { await db.collection(col).doc(id).delete(); refreshUI(); } }
-    
-    function editMatEntry(id, area, dir, len, wid, date, qty, name) { 
-        currentEditMatId = id; 
-        document.getElementById('mat-date').value = date; 
-        document.getElementById('mat-area').value = area; 
-        document.getElementById('mat-direction').value = dir || ""; 
-        document.getElementById('mat-length').value = len; 
-        document.getElementById('mat-width').value = wid || ""; 
-        document.getElementById('mat-qty').value = qty || 1; 
-        const sel = document.getElementById('mat-type'); 
-        for(let i=0; i<sel.options.length; i++) { 
-            if(sel.options[i].text === name) { sel.selectedIndex = i; break; } 
-        } 
-        togglePlateInput(); 
-        document.getElementById('mat-action-btn').innerHTML = '<i class="fas fa-save"></i> Update Material'; 
-        window.scrollTo({ top: document.getElementById('mat-date').offsetTop - 50, behavior: 'smooth' });
-    }
+    async function removeDoc(col, id) { if(confirm("Delete this?")) { await db.collection(col).doc(id).delete(); refreshUI(); } }
+    function togglePlateInput() { const isPlate = document.getElementById('mat-type').options[document.getElementById('mat-type').selectedIndex].getAttribute('data-type') === 'plate'; document.getElementById('plate-width-div').classList.toggle('hidden', !isPlate); }
 
+    // --- PDF GENERATION WITH TOTAL AT BOTTOM ---
     function generateMaterialPDF() {
-        if (window.pdfMaterials.length === 0) return alert("No data available to export");
+        if (window.pdfMaterials.length === 0) return alert("No data!");
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         const site = document.getElementById('site-name-input').value || "Project";
+        const totalKg = document.getElementById('grand-total').innerText;
+
         doc.setFontSize(18); doc.setTextColor(26, 115, 232); doc.text("MATERIAL LOG REPORT", 14, 20);
-        doc.setFontSize(11); doc.setTextColor(100); doc.text("Project: " + site + " | Total Weight: " + document.getElementById('grand-total').innerText, 14, 28);
+        doc.setFontSize(11); doc.setTextColor(100); doc.text("Project: " + site, 14, 28);
         
         const areaGrouped = {};
         window.pdfMaterials.forEach(m => { 
             if(!areaGrouped[m.area]) areaGrouped[m.area] = []; 
-            areaGrouped[m.area].push([formatToDisplayDate(m.date), m.direction, m.name, m.size, m.qty, m.weight.toFixed(2)]); 
+            areaGrouped[m.area].push([m.date, m.direction || '-', m.name, m.size, m.qty, m.weight.toFixed(2)]); 
         });
         
         let yPos = 35;
         Object.keys(areaGrouped).sort().forEach(area => {
-            if(yPos > 240) { doc.addPage(); yPos = 20; }
             doc.setFontSize(12); doc.setTextColor(0); doc.text("Area: " + area, 14, yPos);
-            doc.autoTable({ startY: yPos + 2, head: [['Date', 'Dir', 'Item', 'Size', 'Qty', 'Weight (kg)']], body: areaGrouped[area], theme: 'grid', headStyles: { fillColor: [26, 115, 232] }, styles: { fontSize: 8 } });
-            yPos = doc.lastAutoTable.finalY + 12;
+            doc.autoTable({ startY: yPos + 2, head: [['Date', 'Dir', 'Item', 'Size', 'Qty', 'Weight (kg)']], body: areaGrouped[area], theme: 'grid', headStyles: { fillColor: [26, 115, 232] } });
+            yPos = doc.lastAutoTable.finalY + 10;
+            if(yPos > 270) { doc.addPage(); yPos = 20; }
         });
 
-        const materialSummary = {};
-        window.pdfMaterials.forEach(m => {
-            if (!materialSummary[m.name]) materialSummary[m.name] = { totalWeight: 0 };
-            materialSummary[m.name].totalWeight += m.weight;
-        });
+        // --- FINAL SUMMARY AT THE BOTTOM ---
+        if(yPos > 240) { doc.addPage(); yPos = 20; }
+        doc.setDrawColor(26, 115, 232); doc.setLineWidth(0.5);
+        doc.line(14, yPos, 196, yPos);
         
-        // Removed Quantity column from the summary mapping below
-        const summaryBody = Object.keys(materialSummary).sort().map(name => [name, materialSummary[name].totalWeight.toFixed(2) + " kg"]);
+        doc.setFontSize(14); doc.setTextColor(0);
+        doc.text("GRAND TOTAL WEIGHT:", 14, yPos + 10);
+        doc.setTextColor(217, 48, 37); // Red color for total
+        doc.setFont(undefined, 'bold');
+        doc.text(totalKg, 150, yPos + 10);
         
-        if(yPos > 220) { doc.addPage(); yPos = 20; }
-        doc.setFontSize(14); doc.setTextColor(26, 115, 232); doc.text("MATERIAL SUMMARY (TOTALS)", 14, yPos);
-        
-        // Updated header to exclude 'Total Quantity'
-        doc.autoTable({ 
-            startY: yPos + 4, 
-            head: [['Material Name', 'Total Weight']], 
-            body: summaryBody, 
-            theme: 'grid', 
-            headStyles: { fillColor: [21, 101, 192] }, 
-            styles: { fontSize: 9, fontStyle: 'bold' } 
-        });
-        
-        doc.save(site + "_Material_Log.pdf");
+        doc.save(site + "_Report.pdf");
     }
 </script>
+
+<link rel="manifest" href='data:application/json,{"name":"MaterialLogManager","short_name":"MatLog","start_url":".","display":"standalone","background_color":"#f4f6f9","theme_color":"#1a73e8","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/583/583374.png","sizes":"512x512","type":"image/png"}]}'>
+
 </body>
 </html>
