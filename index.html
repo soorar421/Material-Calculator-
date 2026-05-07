@@ -21,9 +21,7 @@
             --danger: #d93025;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -66,9 +64,7 @@
             align-items: center;
         }
 
-        .section {
-            padding: 20px;
-        }
+        .section { padding: 20px; }
 
         .card {
             background: white;
@@ -94,21 +90,9 @@
             font-size: 15px;
         }
 
-        button {
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-red {
-            background: var(--danger);
-            color: white;
-        }
+        button { border: none; cursor: pointer; font-weight: bold; }
+        .btn { background: var(--primary); color: white; }
+        .btn-red { background: var(--danger); color: white; }
 
         .summary {
             background: #e8f0fe;
@@ -118,11 +102,7 @@
             text-align: center;
         }
 
-        .summary h2 {
-            margin: 0;
-            color: #0d47a1;
-            font-size: 30px;
-        }
+        .summary h2 { margin: 0; color: #0d47a1; font-size: 30px; }
 
         .area-badge {
             display: inline-block;
@@ -135,48 +115,13 @@
             margin-top: 15px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th {
-            background: #f1f3f4;
-            padding: 10px;
-            text-align: left;
-            font-size: 12px;
-        }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-        }
-
-        img.preview {
-            width: 80px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        .flex {
-            display: flex;
-            gap: 10px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-            padding: 20px;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f1f3f4; padding: 10px; text-align: left; font-size: 12px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        img.preview { width: 80px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .flex { display: flex; gap: 10px; }
+        .hidden { display: none; }
+        .footer { text-align: center; font-size: 12px; color: #666; padding: 20px; }
 
         #loading {
             position: fixed;
@@ -189,18 +134,7 @@
             flex-direction: column;
         }
 
-        .photo-link {
-            color: #1a73e8;
-            font-size: 12px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 5px;
-        }
-
+        .action-btns { display: flex; gap: 5px; }
         .circle-btn {
             width: 35px;
             height: 35px;
@@ -215,7 +149,7 @@
 <body>
     <div id="loading">
         <i class="fas fa-spinner fa-spin fa-3x" style="color:#1a73e8;"></i>
-        <p>Uploading Photo...</p>
+        <p>Processing...</p>
     </div>
     <div class="container">
         <div class="header">
@@ -243,9 +177,7 @@
                     <h2 id="grand-total">0.00 KG</h2>
                 </div>
                 <div class="card">
-                    <div class="title">
-                        <i class="fas fa-box"></i> Material Entry
-                    </div>
+                    <div class="title"><i class="fas fa-box"></i> Material Entry</div>
                     <input type="date" id="mat-date">
                     <div class="flex">
                         <input type="text" id="mat-area" placeholder="Area Name">
@@ -258,7 +190,7 @@
                             <option>Center</option>
                         </select>
                     </div>
-                    <label style="font-size:13px;font-weight:bold;">Upload Photo</label>
+                    <label style="font-size:13px;font-weight:bold;">Upload Photo (Optional)</label>
                     <input type="file" id="mat-photo" accept="image/*">
                     <select id="mat-type" onchange="togglePlate()">
                         <optgroup label="Beams">
@@ -296,9 +228,7 @@
                     </button>
                 </div>
                 <div class="card">
-                    <div class="title">
-                        <i class="fas fa-list"></i> Material Log
-                    </div>
+                    <div class="title"><i class="fas fa-list"></i> Material Log</div>
                     <div id="material-list"></div>
                     <button class="btn" onclick="generatePDF()" style="margin-top:20px;background:#0f9d58;">
                         <i class="fas fa-file-pdf"></i> Export PDF
@@ -310,9 +240,7 @@
     </div>
 
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js');
-        }
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
 
         const firebaseConfig = {
             apiKey: "AIzaSyDRDLw2bE_iG7OuE6diCGtrLmDePZStKr8",
@@ -370,16 +298,12 @@
             let formData = new FormData();
             formData.append("image", file);
             try {
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
                 const data = await res.json();
                 document.getElementById('loading').style.display = "none";
                 return data.data.url;
             } catch (e) {
                 document.getElementById('loading').style.display = "none";
-                alert("Upload Failed");
                 return "";
             }
         }
@@ -393,10 +317,7 @@
             const qty = parseFloat(document.getElementById('mat-qty').value) || 1;
             const file = document.getElementById('mat-photo').files[0];
 
-            if (!date || !length) {
-                alert("Fill all mandatory fields");
-                return;
-            }
+            if (!date || !length) { alert("Fill all mandatory fields"); return; }
 
             let photo = "";
             if (file) { photo = await uploadImage(file); }
@@ -415,12 +336,9 @@
             }
 
             const data = {
-                date,
-                area,
-                direction,
+                date, area, direction,
                 name: sel.options[sel.selectedIndex].text,
-                size,
-                qty,
+                size, qty,
                 weight: parseFloat(weight.toFixed(2)),
                 uid: auth.currentUser.uid,
                 ts: Date.now()
@@ -429,9 +347,6 @@
             if (photo) data.photo = photo;
 
             if (editId) {
-                if (!file) {
-                    delete data.photo;
-                }
                 await db.collection('materials').doc(editId).update(data);
                 editId = null;
                 document.getElementById('save-btn').innerHTML = '<i class="fas fa-save"></i> Save Material';
@@ -439,23 +354,20 @@
                 await db.collection('materials').add(data);
             }
 
-            // Reset Fields
+            // Clear inputs
             document.getElementById('mat-length').value = "";
             document.getElementById('mat-width').value = "";
             document.getElementById('mat-photo').value = "";
             document.getElementById('mat-area').value = "";
             document.getElementById('mat-direction').value = "";
             document.getElementById('mat-qty').value = "1";
-
             loadMaterials();
         }
 
         async function loadMaterials() {
             const snap = await db.collection('materials').where('uid', '==', auth.currentUser.uid).get();
             materials = [];
-            snap.forEach(doc => {
-                materials.push({ id: doc.id, ...doc.data() });
-            });
+            snap.forEach(doc => { materials.push({ id: doc.id, ...doc.data() }); });
             renderMaterials();
         }
 
@@ -478,7 +390,7 @@
                     <td><strong>${m.name}</strong><br>${m.direction || '-'}<br><small>${formatDate(m.date)}</small></td>
                     <td>${m.size}<br>Qty:${m.qty}</td>
                     <td>${m.weight} KG</td>
-                    <td>${m.photo ? `<a href="${m.photo}" target="_blank" class="photo-link"><img src="${m.photo}" class="preview"><br>View Photo</a>` : '-'}</td>
+                    <td>${m.photo ? `<a href="${m.photo}" target="_blank"><img src="${m.photo}" class="preview"></a>` : '-'}</td>
                     <td><div class="action-btns">
                         <button class="btn circle-btn" onclick="editMaterial('${m.id}')"><i class="fas fa-pencil-alt"></i></button>
                         <button class="btn-red circle-btn" onclick="deleteMaterial('${m.id}')"><i class="fas fa-trash"></i></button>
@@ -491,17 +403,18 @@
 
         function editMaterial(id) {
             const m = materials.find(x => x.id === id);
+            if (!m) return;
             editId = id;
 
+            // Load data into fields
             document.getElementById('mat-date').value = m.date;
-            document.getElementById('mat-area').value = m.area;
+            document.getElementById('mat-area').value = m.area || "";
             document.getElementById('mat-direction').value = m.direction || "";
-            document.getElementById('mat-qty').value = m.qty;
+            document.getElementById('mat-qty').value = m.qty || 1;
 
-            // Material Type selecting logic
             const sel = document.getElementById('mat-type');
             for (let i = 0; i < sel.options.length; i++) {
-                if (sel.options[i].text.trim() === m.name.trim()) {
+                if (sel.options[i].text === m.name) {
                     sel.selectedIndex = i;
                     break;
                 }
@@ -509,14 +422,13 @@
 
             togglePlate();
 
-            // Size parsing logic
-            const sizeClean = m.size.replace(" mm", "");
-            if (sizeClean.includes("x")) {
-                const parts = sizeClean.split("x");
-                document.getElementById('mat-length').value = parts[0];
-                document.getElementById('mat-width').value = parts[1];
+            const sizeParts = m.size.replace(" mm", "");
+            if (sizeParts.includes("x")) {
+                const dimensions = sizeParts.split("x");
+                document.getElementById('mat-length').value = dimensions[0];
+                document.getElementById('mat-width').value = dimensions[1];
             } else {
-                document.getElementById('mat-length').value = sizeClean;
+                document.getElementById('mat-length').value = sizeParts;
                 document.getElementById('mat-width').value = "";
             }
 
@@ -550,20 +462,12 @@
             const grouped = {};
             materials.forEach(m => {
                 if (!grouped[m.area]) { grouped[m.area] = []; }
-                grouped[m.area].push([
-                    formatDate(m.date),
-                    m.direction || '-',
-                    m.name,
-                    m.size,
-                    m.qty,
-                    m.weight.toFixed(2) + " KG"
-                ]);
+                grouped[m.area].push([formatDate(m.date), m.direction || '-', m.name, m.size, m.qty, m.weight.toFixed(2) + " KG"]);
             });
 
             Object.keys(grouped).sort().forEach(area => {
                 if (y > 240) { doc.addPage(); y = 20; }
-                doc.setFontSize(13);
-                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(13); doc.setTextColor(0);
                 doc.text("AREA: " + area, 14, y);
                 doc.autoTable({
                     startY: y + 3,
@@ -576,20 +480,13 @@
                 y = doc.lastAutoTable.finalY + 15;
             });
 
+            // Material Summary
             const summary = {};
-            materials.forEach(m => {
-                if (!summary[m.name]) { summary[m.name] = 0; }
-                summary[m.name] += m.weight;
-            });
-
-            const summaryBody = [];
-            Object.keys(summary).sort().forEach(name => {
-                summaryBody.push([name, summary[name].toFixed(2) + " KG"]);
-            });
+            materials.forEach(m => { summary[m.name] = (summary[m.name] || 0) + m.weight; });
+            const summaryBody = Object.keys(summary).sort().map(name => [name, summary[name].toFixed(2) + " KG"]);
 
             if (y > 220) { doc.addPage(); y = 20; }
-            doc.setFontSize(15);
-            doc.setTextColor(26, 115, 232);
+            doc.setFontSize(15); doc.setTextColor(26, 115, 232);
             doc.text("MATERIAL SUMMARY", 14, y);
             doc.autoTable({
                 startY: y + 5,
@@ -599,11 +496,11 @@
                 headStyles: { fillColor: [21, 101, 192] }
             });
 
-            // Grand Total at the bottom
+            // FINAL TOTAL AT THE BOTTOM
             y = doc.lastAutoTable.finalY + 20;
             if (y > 270) { doc.addPage(); y = 20; }
             doc.setFontSize(16);
-            doc.setTextColor(15, 157, 88); // Green color
+            doc.setTextColor(15, 157, 88);
             doc.text("GRAND TOTAL WEIGHT: " + totalWeightStr, 14, y);
 
             doc.save(site + "_Material_Report.pdf");
