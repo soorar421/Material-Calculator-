@@ -354,12 +354,10 @@
                 await db.collection('materials').add(data);
             }
 
-            // Clear inputs
+            // Resetting specific fields only - Area and Direction stay
             document.getElementById('mat-length').value = "";
             document.getElementById('mat-width').value = "";
             document.getElementById('mat-photo').value = "";
-            document.getElementById('mat-area').value = "";
-            document.getElementById('mat-direction').value = "";
             document.getElementById('mat-qty').value = "1";
             loadMaterials();
         }
@@ -406,7 +404,6 @@
             if (!m) return;
             editId = id;
 
-            // Load data into fields
             document.getElementById('mat-date').value = m.date;
             document.getElementById('mat-area').value = m.area || "";
             document.getElementById('mat-direction').value = m.direction || "";
@@ -480,7 +477,6 @@
                 y = doc.lastAutoTable.finalY + 15;
             });
 
-            // Material Summary
             const summary = {};
             materials.forEach(m => { summary[m.name] = (summary[m.name] || 0) + m.weight; });
             const summaryBody = Object.keys(summary).sort().map(name => [name, summary[name].toFixed(2) + " KG"]);
@@ -496,7 +492,6 @@
                 headStyles: { fillColor: [21, 101, 192] }
             });
 
-            // FINAL TOTAL AT THE BOTTOM
             y = doc.lastAutoTable.finalY + 20;
             if (y > 270) { doc.addPage(); y = 20; }
             doc.setFontSize(16);
