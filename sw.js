@@ -1,22 +1,25 @@
-const CACHE_NAME = "gs-material-cache-v1";
-
-const urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./icon.png"
+const CACHE_NAME = 'gs-material-v1';
+const ASSETS = [
+  'index.html',
+  'manifest.json',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
-self.addEventListener("install", event => {
+// Install Service Worker
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(ASSETS);
+    })
   );
 });
 
-self.addEventListener("fetch", event => {
+// Fetch Assets
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
   );
 });
