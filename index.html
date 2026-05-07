@@ -1,942 +1,972 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GS Material Manager Pro</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a73e8">
-<link rel="apple-touch-icon" href="icon.png">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-<style>
-
-:root{
-    --primary:#1a73e8;
-    --dark:#202124;
-    --green:#0f9d58;
-    --danger:#d93025;
-}
-
-*{
-    box-sizing:border-box;
-}
-
-body{
-    margin:0;
-    padding:10px;
-    background:#f1f5f9;
-    font-family:Segoe UI,sans-serif;
-}
-
-.container{
-    max-width:950px;
-    margin:auto;
-    background:white;
-    border-radius:20px;
-    overflow:hidden;
-    box-shadow:0 10px 30px rgba(0,0,0,0.1);
-}
-
-.header{
-    background:linear-gradient(135deg,#1a73e8,#0d47a1);
-    color:white;
-    padding:25px;
-    text-align:center;
-}
-
-.site-banner{
-    background:#fff8e1;
-    color:#f57f17;
-    font-size:22px;
-    font-weight:bold;
-    text-align:center;
-    padding:15px;
-    border-bottom:3px solid #fbc02d;
-}
-
-.top-user{
-    background:#eceff1;
-    padding:10px 15px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.section{
-    padding:20px;
-}
-
-.card{
-    background:white;
-    border-radius:15px;
-    border:1px solid #ddd;
-    padding:20px;
-    margin-bottom:15px;
-}
-
-.title{
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:15px;
-    color:var(--primary);
-}
-
-input,select,button{
-    width:100%;
-    padding:14px;
-    margin:8px 0;
-    border-radius:10px;
-    border:1px solid #ccc;
-    font-size:15px;
-}
-
-button{
-    border:none;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-.btn{
-    background:var(--primary);
-    color:white;
-}
-
-.btn-red{
-    background:var(--danger);
-    color:white;
-}
-
-.summary{
-    background:#e8f0fe;
-    padding:20px;
-    border-radius:15px;
-    margin-bottom:20px;
-    text-align:center;
-}
-
-.summary h2{
-    margin:0;
-    color:#0d47a1;
-    font-size:30px;
-}
-
-.area-badge{
-    display:inline-block;
-    background:#e3f2fd;
-    color:#1565c0;
-    padding:5px 12px;
-    border-radius:30px;
-    font-size:12px;
-    font-weight:bold;
-    margin-top:15px;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:10px;
-}
-
-th{
-    background:#f1f3f4;
-    padding:10px;
-    text-align:left;
-    font-size:12px;
-}
-
-td{
-    padding:10px;
-    border-bottom:1px solid #eee;
-    font-size:14px;
-}
-
-img.preview{
-    width:80px;
-    height:60px;
-    object-fit:cover;
-    border-radius:8px;
-    border:1px solid #ddd;
-}
-
-.flex{
-    display:flex;
-    gap:10px;
-}
-
-.hidden{
-    display:none;
-}
-
-.footer{
-    text-align:center;
-    font-size:12px;
-    color:#666;
-    padding:20px;
-}
-
-#loading{
-    position:fixed;
-    inset:0;
-    background:rgba(255,255,255,0.8);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:999;
-    flex-direction:column;
-}
-
-.photo-link{
-    color:#1a73e8;
-    font-size:12px;
-    text-decoration:none;
-    font-weight:bold;
-}
-
-.action-btns{
-    display:flex;
-    gap:5px;
-}
-
-.circle-btn{
-    width:35px;
-    height:35px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:0;
-}
-
-</style>
-</head>
-
-<body>
-
-<div id="loading">
-    <i class="fas fa-spinner fa-spin fa-3x" style="color:#1a73e8;"></i>
-    <p>Uploading Photo...</p>
-</div>
-
-<div class="container">
-
-<div class="header">
-    <h1><i class="fas fa-industry"></i> GS MATERIAL MANAGER PRO</h1>
-</div>
-
-<div id="login-section" class="section" style="text-align:center;padding:80px 20px;">
-    <button class="btn" onclick="login()" style="max-width:300px;">
-        <i class="fab fa-google"></i> Login with Google
-    </button>
-</div>
-
-<div id="main" class="hidden">
-
-<div class="site-banner" id="site-title">
-    NO SITE SELECTED
-</div>
-
-<div class="top-user">
-    <span id="user-name" style="font-weight:bold;font-size:13px;"></span>
-
-    <button class="btn-red"
-    onclick="logout()"
-    style="width:auto;padding:8px 15px;margin:0;">
-    <i class="fas fa-sign-out-alt"></i> Logout
-    </button>
-</div>
-
-<div class="section">
-
-<div class="card">
-    <input type="text"
-    id="site-name"
-    placeholder="Enter Site Name"
-    oninput="updateSite()">
-</div>
-
-<div class="summary">
-    <div>Total Material Weight</div>
-    <h2 id="grand-total">0.00 KG</h2>
-</div>
-
-<div class="card">
-
-<div class="title">
-    <i class="fas fa-box"></i> Material Entry
-</div>
-
-<input type="date" id="mat-date">
-
-<div class="flex">
-    <input type="text" id="mat-area" placeholder="Area Name">
-
-    <select id="mat-direction">
-        <option value="">Direction</option>
-        <option>North</option>
-        <option>South</option>
-        <option>East</option>
-        <option>West</option>
-        <option>Center</option>
-    </select>
-</div>
-
-<label style="font-size:13px;font-weight:bold;">
-    Upload Photo
-</label>
-
-<input type="file" id="mat-photo" accept="image/*">
-
-<select id="mat-type" onchange="togglePlate()">
-
-<optgroup label="Beams">
-<option value="46" data-type="linear">ISMB 300 (46 kg/m)</option>
-</optgroup>
-
-<optgroup label="Channels">
-<option value="22.3" data-type="linear">ISMC 200 (22.3 kg/m)</option>
-<option value="16.8" data-type="linear">ISMC 150 (16.8 kg/m)</option>
-<option value="13.1" data-type="linear">ISMC 125 (13.1 kg/m)</option>
-</optgroup>
-
-<optgroup label="Angles">
-<option value="19.7" data-type="linear">ISA 130 (19.7 kg/m)</option>
-<option value="14.9" data-type="linear">ISA 100 (14.9 kg/m)</option>
-<option value="11" data-type="linear">ISA 75 (11 kg/m)</option>
-<option value="4.5" data-type="linear">ISA 50 (4.5 kg/m)</option>
-</optgroup>
-
-<optgroup label="Flats">
-<option value="4.7" data-type="linear">ISF 100 (4.7 kg/m)</option>
-<option value="1.5" data-type="linear">ISF 32 (1.5 kg/m)</option>
-</optgroup>
-
-<optgroup label="Plates">
-<option value="78.5" data-type="plate">10mm Plate (78.5 kg/sq.m)</option>
-<option value="53.2" data-type="plate">CH Plate (53.2 kg/sq.m)</option>
-</optgroup>
-
-</select>
-
-<div id="plate-div" class="hidden">
-    <input type="number" id="mat-width" placeholder="Width in MM">
-</div>
-
-<div class="flex">
-    <input type="number" id="mat-length" placeholder="Length in MM">
-    <input type="number" id="mat-qty" placeholder="Qty" value="1">
-</div>
-
-<button class="btn" id="save-btn" onclick="saveMaterial()">
-    <i class="fas fa-save"></i> Save Material
-</button>
-
-</div>
-
-<div class="card">
-
-<div class="title">
-    <i class="fas fa-list"></i> Material Log
-</div>
-
-<div id="material-list"></div>
-
-<button class="btn"
-onclick="generatePDF()"
-style="margin-top:20px;background:#0f9d58;">
-    <i class="fas fa-file-pdf"></i> Export PDF
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="footer">
-Designed by soorajrmaranadu
-</div>
-
-</div>
-
-<script>
-
-if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./sw.js');
-}
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDRDLw2bE_iG7OuE6diCGtrLmDePZStKr8",
-    authDomain: "gsconstructions-3f4c9.firebaseapp.com",
-    projectId: "gsconstructions-3f4c9",
-    storageBucket: "gsconstructions-3f4c9.firebasestorage.app",
-    messagingSenderId: "622430516475",
-    appId: "1:622430516475:web:17fd96908472cbd665ec5e"
-};
-
-const IMGBB_API_KEY = "b48c7ab06cc8ad41b1ec1188653de8be";
-
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-const provider = new firebase.auth.GoogleAuthProvider();
-
-let materials = [];
-let editId = null;
-
-function login(){
-    auth.signInWithPopup(provider);
-}
-
-function logout(){
-    auth.signOut().then(()=>{
-        location.reload();
-    });
-}
-
-auth.onAuthStateChanged(user=>{
-
-    if(user){
-
-        document.getElementById('login-section')
-        .classList.add('hidden');
-
-        document.getElementById('main')
-        .classList.remove('hidden');
-
-        document.getElementById('user-name')
-        .innerText = "Active User : " + user.displayName;
-
-        document.getElementById('mat-date').value =
-        new Date().toISOString().split('T')[0];
-
-        document.getElementById('site-name').value =
-        localStorage.getItem('site_name') || "";
-
-        updateSite();
-
-        loadMaterials();
-    }
-
-});
-
-function updateSite(){
-
-    const val = document.getElementById('site-name').value;
-
-    document.getElementById('site-title').innerText =
-    val || "NO SITE SELECTED";
-
-    localStorage.setItem('site_name',val);
-}
-
-function formatDate(dateStr){
-
-    if(!dateStr) return "";
-
-    const parts = dateStr.split("-");
-
-    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-}
-
-function togglePlate(){
-
-    const sel = document.getElementById('mat-type');
-
-    const isPlate =
-    sel.options[sel.selectedIndex].dataset.type === "plate";
-
-    document.getElementById('plate-div')
-    .classList.toggle('hidden',!isPlate);
-}
-
-async function uploadImage(file){
-
-    document.getElementById('loading').style.display = "flex";
-
-    let formData = new FormData();
-
-    formData.append("image",file);
-
-    try{
-
-        const res = await fetch(
-        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
-        {
-            method:'POST',
-            body:formData
-        });
-
-        const data = await res.json();
-
-        document.getElementById('loading').style.display = "none";
-
-        return data.data.url;
-
-    }catch(e){
-
-        document.getElementById('loading').style.display = "none";
-
-        alert("Upload Failed");
-
-        return "";
-    }
-}
-
-async function saveMaterial(){
-
-    const date = document.getElementById('mat-date').value;
-
-    const area =
-    document.getElementById('mat-area').value || "General Area";
-
-    const direction =
-    document.getElementById('mat-direction').value;
-
-    const sel = document.getElementById('mat-type');
-
-    const length =
-    parseFloat(document.getElementById('mat-length').value);
-
-    const qty =
-    parseFloat(document.getElementById('mat-qty').value) || 1;
-
-    const file =
-    document.getElementById('mat-photo').files[0];
-
-    if(!date || !length){
-        alert("Fill all mandatory fields");
-        return;
-    }
-
-    let photo = "";
-
-    if(file){
-        photo = await uploadImage(file);
-    }
-
-    let weight = 0;
-    let size = "";
-
-    if(sel.options[sel.selectedIndex].dataset.type === "plate"){
-
-        const width =
-        parseFloat(document.getElementById('mat-width').value);
-
-        if(!width){
-            alert("Enter Width");
-            return;
-        }
-
-        weight =
-        ((length/1000)*(width/1000)*parseFloat(sel.value))*qty;
-
-        size = length + "x" + width + " mm";
-
-    }else{
-
-        weight =
-        ((length/1000)*parseFloat(sel.value))*qty;
-
-        size = length + " mm";
-    }
-
-    const data = {
-
-        date,
-        area,
-        direction,
-        name:sel.options[sel.selectedIndex].text,
-        size,
-        qty,
-        weight:parseFloat(weight.toFixed(2)),
-        photo,
-        uid:auth.currentUser.uid,
-        ts:Date.now()
-
-    };
-
-    if(editId){
-
-        if(!file){
-            delete data.photo;
-        }
-
-        await db.collection('materials')
-        .doc(editId)
-        .update(data);
-
-        editId = null;
-
-        document.getElementById('save-btn').innerHTML =
-        '<i class="fas fa-save"></i> Save Material';
-
-    }else{
-
-        await db.collection('materials').add(data);
-    }
-
-    document.getElementById('mat-length').value="";
-    document.getElementById('mat-width').value="";
-    document.getElementById('mat-photo').value="";
-    document.getElementById('mat-area').value="";
-    document.getElementById('mat-qty').value="1";
-
-    loadMaterials();
-}
-
-async function loadMaterials(){
-
-    const snap = await db.collection('materials')
-    .where('uid','==',auth.currentUser.uid)
-    .get();
-
-    materials = [];
-
-    snap.forEach(doc=>{
-
-        materials.push({
-            id:doc.id,
-            ...doc.data()
-        });
-
-    });
-
-    renderMaterials();
-}
-
-function renderMaterials(){
-
-    let total = 0;
-
-    const grouped = {};
-
-    materials.forEach(m=>{
-
-        total += m.weight;
-
-        if(!grouped[m.area]){
-            grouped[m.area] = [];
-        }
-
-        grouped[m.area].push(m);
-
-    });
-
-    document.getElementById('grand-total').innerText =
-    total.toFixed(2) + " KG";
-
-    let html = "";
-
-    Object.keys(grouped).sort().forEach(area=>{
-
-        html += `
-        <div class="area-badge">
-            <i class="fas fa-map-marker-alt"></i>
-            ${area}
-        </div>
-
-        <table>
-
-        <thead>
-        <tr>
-        <th>Material</th>
-        <th>Size</th>
-        <th>Weight</th>
-        <th>Photo</th>
-        <th>Action</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        `;
-
-        grouped[area].forEach(m=>{
-
-            html += `
-            <tr>
-
-            <td>
-            <strong>${m.name}</strong><br>
-            ${m.direction || '-'}<br>
-            <small>${formatDate(m.date)}</small>
-            </td>
-
-            <td>
-            ${m.size}<br>
-            Qty:${m.qty}
-            </td>
-
-            <td>
-            ${m.weight} KG
-            </td>
-
-            <td>
-
-            ${m.photo ?
-
-            `<a href="${m.photo}"
-            target="_blank"
-            class="photo-link">
-
-            <img src="${m.photo}" class="preview"><br>
-
-            View Photo
-
-            </a>`
-
-            : '-'}
-
-            </td>
-
-            <td>
-
-            <div class="action-btns">
-
-            <button class="btn circle-btn"
-            onclick="editMaterial('${m.id}')">
-
-            <i class="fas fa-pencil-alt"></i>
-
-            </button>
-
-            <button class="btn-red circle-btn"
-            onclick="deleteMaterial('${m.id}')">
-
-            <i class="fas fa-trash"></i>
-
-            </button>
-
-            </div>
-
-            </td>
-
-            </tr>
-            `;
-        });
-
-        html += `</tbody></table>`;
-    });
-
-    document.getElementById('material-list').innerHTML = html;
-}
-
-function editMaterial(id){
-
-    const m = materials.find(x=>x.id===id);
-
-    editId = id;
-
-    document.getElementById('mat-date').value = m.date;
-    document.getElementById('mat-area').value = m.area;
-    document.getElementById('mat-direction').value = m.direction;
-    document.getElementById('mat-qty').value = m.qty;
-
-    const sel = document.getElementById('mat-type');
-
-    for(let i=0;i<sel.options.length;i++){
-
-        if(sel.options[i].text === m.name){
-            sel.selectedIndex = i;
-            break;
-        }
-    }
-
-    togglePlate();
-
-    const size = m.size.replace(" mm","");
-
-    if(size.includes("x")){
-
-        const parts = size.split("x");
-
-        document.getElementById('mat-length').value = parts[0];
-        document.getElementById('mat-width').value = parts[1];
-
-    }else{
-
-        document.getElementById('mat-length').value = size;
-    }
-
-    document.getElementById('save-btn').innerHTML =
-    '<i class="fas fa-save"></i> Update Material';
-
-    window.scrollTo({
-        top:0,
-        behavior:'smooth'
-    });
-}
-
-async function deleteMaterial(id){
-
-    if(confirm("Delete this material?")){
-
-        await db.collection('materials')
-        .doc(id)
-        .delete();
-
-        loadMaterials();
-    }
-}
-
-function generatePDF(){
-
-    if(materials.length===0){
-        alert("No Data");
-        return;
-    }
-
-    const { jsPDF } = window.jspdf;
-
-    const doc = new jsPDF();
-
-    const site =
-    document.getElementById('site-name').value || "Project";
-
-    doc.setFontSize(20);
-    doc.setTextColor(26,115,232);
-    doc.text("GS MATERIAL REPORT",14,20);
-
-    doc.setFontSize(11);
-    doc.setTextColor(100);
-
-    const totalWeight =
-    document.getElementById('grand-total').innerText;
-
-    doc.text(
-        "Project : " + site +
-        " | Total Weight : " + totalWeight,
-        14,
-        28
-    );
-
-    let y = 40;
-
-    const grouped = {};
-
-    materials.forEach(m=>{
-
-        if(!grouped[m.area]){
-            grouped[m.area] = [];
-        }
-
-        grouped[m.area].push([
-            formatDate(m.date),
-            m.direction || '-',
-            m.name,
-            m.size,
-            m.qty,
-            m.weight.toFixed(2) + " KG"
-        ]);
-    });
-
-    Object.keys(grouped).sort().forEach(area=>{
-
-        if(y > 240){
-            doc.addPage();
-            y = 20;
-        }
-
-        doc.setFontSize(13);
-
-        doc.text("AREA : " + area,14,y);
-
-        doc.autoTable({
-
-            startY:y+3,
-
-            head:[[
-                'Date',
-                'Direction',
-                'Material',
-                'Size',
-                'Qty',
-                'Weight'
-            ]],
-
-            body:grouped[area],
-
-            theme:'grid',
-
-            headStyles:{
-                fillColor:[26,115,232]
-            },
-
-            styles:{
-                fontSize:8
-            }
-
-        });
-
-        y = doc.lastAutoTable.finalY + 15;
-    });
-
-    const summary = {};
-
-    materials.forEach(m=>{
-
-        if(!summary[m.name]){
-            summary[m.name] = 0;
-        }
-
-        summary[m.name] += m.weight;
-    });
-
-    const summaryBody = [];
-
-    Object.keys(summary).sort().forEach(name=>{
-
-        summaryBody.push([
-            name,
-            summary[name].toFixed(2) + " KG"
-        ]);
-
-    });
-
-    if(y > 220){
-        doc.addPage();
-        y = 20;
-    }
-
-    doc.setFontSize(15);
-
-    doc.setTextColor(26,115,232);
-
-    doc.text("MATERIAL SUMMARY",14,y);
-
-    doc.autoTable({
-
-        startY:y+5,
-
-        head:[[
-            'Material Name',
-            'Total Weight'
-        ]],
-
-        body:summaryBody,
-
-        theme:'grid',
-
-        headStyles:{
-            fillColor:[21,101,192]
-        }
-
-    });
-
-    doc.save(site + "_Material_Report.pdf");
-}
-
-</script>
-
-</body>
+<!DOCTYPE html>      
+<html lang="en">      
+<head>      
+<meta charset="UTF-8">      
+<meta name="viewport" content="width=device-width, initial-scale=1.0">      
+<title>GS Material Manager Pro</title>      
+      
+<link rel="manifest" href="manifest.json">      
+<meta name="theme-color" content="#1a73e8">      
+<link rel="apple-touch-icon" href="icon.png">      
+      
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">      
+      
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>      
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>      
+      
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>      
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>      
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>      
+      
+<style>      
+      
+:root{      
+    --primary:#1a73e8;      
+    --dark:#202124;      
+    --green:#0f9d58;      
+    --danger:#d93025;      
+}      
+      
+*{      
+    box-sizing:border-box;      
+}      
+      
+body{      
+    margin:0;      
+    padding:10px;      
+    background:#f1f5f9;      
+    font-family:Segoe UI,sans-serif;      
+}      
+      
+.container{      
+    max-width:950px;      
+    margin:auto;      
+    background:white;      
+    border-radius:20px;      
+    overflow:hidden;      
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);      
+}      
+      
+.header{      
+    background:linear-gradient(135deg,#1a73e8,#0d47a1);      
+    color:white;      
+    padding:25px;      
+    text-align:center;      
+}      
+      
+.site-banner{      
+    background:#fff8e1;      
+    color:#f57f17;      
+    font-size:22px;      
+    font-weight:bold;      
+    text-align:center;      
+    padding:15px;      
+    border-bottom:3px solid #fbc02d;      
+}      
+      
+.top-user{      
+    background:#eceff1;      
+    padding:10px 15px;      
+    display:flex;      
+    justify-content:space-between;      
+    align-items:center;      
+}      
+      
+.section{      
+    padding:20px;      
+}      
+      
+.card{      
+    background:white;      
+    border-radius:15px;      
+    border:1px solid #ddd;      
+    padding:20px;      
+    margin-bottom:15px;      
+}      
+      
+.title{      
+    font-size:20px;      
+    font-weight:bold;      
+    margin-bottom:15px;      
+    color:var(--primary);      
+}      
+      
+input,select,button{      
+    width:100%;      
+    padding:14px;      
+    margin:8px 0;      
+    border-radius:10px;      
+    border:1px solid #ccc;      
+    font-size:15px;      
+}      
+      
+button{      
+    border:none;      
+    cursor:pointer;      
+    font-weight:bold;      
+}      
+      
+.btn{      
+    background:var(--primary);      
+    color:white;      
+}      
+      
+.btn-red{      
+    background:var(--danger);      
+    color:white;      
+}      
+      
+.summary{      
+    background:#e8f0fe;      
+    padding:20px;      
+    border-radius:15px;      
+    margin-bottom:20px;      
+    text-align:center;      
+}      
+      
+.summary h2{      
+    margin:0;      
+    color:#0d47a1;      
+    font-size:30px;      
+}      
+      
+.area-badge{      
+    display:inline-block;      
+    background:#e3f2fd;      
+    color:#1565c0;      
+    padding:5px 12px;      
+    border-radius:30px;      
+    font-size:12px;      
+    font-weight:bold;      
+    margin-top:15px;      
+}      
+      
+table{      
+    width:100%;      
+    border-collapse:collapse;      
+    margin-top:10px;      
+}      
+      
+th{      
+    background:#f1f3f4;      
+    padding:10px;      
+    text-align:left;      
+    font-size:12px;      
+}      
+      
+td{      
+    padding:10px;      
+    border-bottom:1px solid #eee;      
+    font-size:14px;      
+}      
+      
+img.preview{      
+    width:80px;      
+    height:60px;      
+    object-fit:cover;      
+    border-radius:8px;      
+    border:1px solid #ddd;      
+}      
+      
+.flex{      
+    display:flex;      
+    gap:10px;      
+}      
+      
+.hidden{      
+    display:none;      
+}      
+      
+.footer{      
+    text-align:center;      
+    font-size:12px;      
+    color:#666;      
+    padding:20px;      
+}      
+      
+#loading{      
+    position:fixed;      
+    inset:0;      
+    background:rgba(255,255,255,0.8);      
+    display:none;      
+    align-items:center;      
+    justify-content:center;      
+    z-index:999;      
+    flex-direction:column;      
+}      
+      
+.photo-link{      
+    color:#1a73e8;      
+    font-size:12px;      
+    text-decoration:none;      
+    font-weight:bold;      
+}      
+      
+.action-btns{      
+    display:flex;      
+    gap:5px;      
+}      
+      
+.circle-btn{      
+    width:35px;      
+    height:35px;      
+    border-radius:50%;      
+    display:flex;      
+    align-items:center;      
+    justify-content:center;      
+    padding:0;      
+}      
+      
+</style>      
+</head>      
+      
+<body>      
+      
+<div id="loading">      
+    <i class="fas fa-spinner fa-spin fa-3x" style="color:#1a73e8;"></i>      
+    <p>Uploading Photo...</p>      
+</div>      
+      
+<div class="container">      
+      
+<div class="header">      
+    <h1><i class="fas fa-industry"></i> GS MATERIAL MANAGER PRO</h1>      
+</div>      
+      
+<div id="login-section" class="section" style="text-align:center;padding:80px 20px;">      
+    <button class="btn" onclick="login()" style="max-width:300px;">      
+        <i class="fab fa-google"></i> Login with Google      
+    </button>      
+</div>      
+      
+<div id="main" class="hidden">      
+      
+<div class="site-banner" id="site-title">      
+    NO SITE SELECTED      
+</div>      
+      
+<div class="top-user">      
+    <span id="user-name" style="font-weight:bold;font-size:13px;"></span>      
+      
+    <button class="btn-red"      
+    onclick="logout()"      
+    style="width:auto;padding:8px 15px;margin:0;">      
+    <i class="fas fa-sign-out-alt"></i> Logout      
+    </button>      
+</div>      
+      
+<div class="section">      
+      
+<div class="card">      
+    <input type="text"      
+    id="site-name"      
+    placeholder="Enter Site Name"      
+    oninput="updateSite()">      
+</div>      
+      
+<div class="summary">      
+    <div>Total Material Weight</div>      
+    <h2 id="grand-total">0.00 KG</h2>      
+</div>      
+      
+<div class="card">      
+      
+<div class="title">      
+    <i class="fas fa-box"></i> Material Entry      
+</div>      
+      
+<input type="date" id="mat-date">      
+      
+<div class="flex">      
+    <input type="text" id="mat-area" placeholder="Area Name">      
+      
+    <select id="mat-direction">      
+        <option value="">Direction</option>      
+        <option>North</option>      
+        <option>South</option>      
+        <option>East</option>      
+        <option>West</option>      
+        <option>Center</option>      
+    </select>      
+</div>      
+      
+<label style="font-size:13px;font-weight:bold;">      
+    Upload Photo      
+</label>      
+      
+<input type="file" id="mat-photo" accept="image/*">      
+      
+<select id="mat-type" onchange="togglePlate()">      
+      
+<optgroup label="Beams">      
+<option value="46" data-type="linear">ISMB 300 (46 kg/m)</option>      
+</optgroup>      
+      
+<optgroup label="Channels">      
+<option value="22.3" data-type="linear">ISMC 200 (22.3 kg/m)</option>      
+<option value="16.8" data-type="linear">ISMC 150 (16.8 kg/m)</option>      
+<option value="13.1" data-type="linear">ISMC 125 (13.1 kg/m)</option>      
+</optgroup>      
+      
+<optgroup label="Angles">      
+<option value="19.7" data-type="linear">ISA 130 (19.7 kg/m)</option>      
+<option value="14.9" data-type="linear">ISA 100 (14.9 kg/m)</option>      
+<option value="11" data-type="linear">ISA 75 (11 kg/m)</option>      
+<option value="4.5" data-type="linear">ISA 50 (4.5 kg/m)</option>      
+</optgroup>      
+      
+<optgroup label="Flats">      
+<option value="4.7" data-type="linear">ISF 100 (4.7 kg/m)</option>      
+<option value="1.5" data-type="linear">ISF 32 (1.5 kg/m)</option>      
+</optgroup>      
+      
+<optgroup label="Plates">      
+<option value="78.5" data-type="plate">10mm Plate (78.5 kg/sq.m)</option>      
+<option value="53.2" data-type="plate">CH Plate (53.2 kg/sq.m)</option>      
+</optgroup>      
+      
+</select>      
+      
+<div id="plate-div" class="hidden">      
+    <input type="number" id="mat-width" placeholder="Width in MM">      
+</div>      
+      
+<div class="flex">      
+    <input type="number" id="mat-length" placeholder="Length in MM">      
+    <input type="number" id="mat-qty" placeholder="Qty" value="1">      
+</div>      
+      
+<button class="btn" id="save-btn" onclick="saveMaterial()">      
+    <i class="fas fa-save"></i> Save Material      
+</button>      
+      
+</div>      
+      
+<div class="card">      
+      
+<div class="title">      
+    <i class="fas fa-list"></i> Material Log      
+</div>      
+      
+<div id="material-list"></div>      
+      
+<button class="btn"      
+onclick="generatePDF()"      
+style="margin-top:20px;background:#0f9d58;">      
+    <i class="fas fa-file-pdf"></i> Export PDF      
+</button>      
+      
+</div>      
+      
+</div>      
+      
+</div>      
+      
+<div class="footer">      
+Designed by soorajrmaranadu      
+</div>      
+      
+</div>      
+      
+<script>      
+      
+if('serviceWorker' in navigator){      
+    navigator.serviceWorker.register('./sw.js');      
+}      
+      
+const firebaseConfig = {      
+    apiKey: "AIzaSyDRDLw2bE_iG7OuE6diCGtrLmDePZStKr8",      
+    authDomain: "gsconstructions-3f4c9.firebaseapp.com",      
+    projectId: "gsconstructions-3f4c9",      
+    storageBucket: "gsconstructions-3f4c9.firebasestorage.app",      
+    messagingSenderId: "622430516475",      
+    appId: "1:622430516475:web:17fd96908472cbd665ec5e"      
+};      
+      
+const IMGBB_API_KEY = "b48c7ab06cc8ad41b1ec1188653de8be";      
+      
+firebase.initializeApp(firebaseConfig);      
+      
+const auth = firebase.auth();      
+const db = firebase.firestore();      
+const provider = new firebase.auth.GoogleAuthProvider();      
+      
+let materials = [];      
+let editId = null;      
+      
+function login(){      
+    auth.signInWithPopup(provider);      
+}      
+      
+function logout(){      
+    auth.signOut().then(()=>{      
+        location.reload();      
+    });      
+}      
+      
+auth.onAuthStateChanged(user=>{      
+      
+    if(user){      
+      
+        document.getElementById('login-section')      
+        .classList.add('hidden');      
+      
+        document.getElementById('main')      
+        .classList.remove('hidden');      
+      
+        document.getElementById('user-name')      
+        .innerText = "Active User : " + user.displayName;      
+      
+        document.getElementById('mat-date').value =      
+        new Date().toISOString().split('T')[0];      
+      
+        document.getElementById('site-name').value =      
+        localStorage.getItem('site_name') || "";      
+      
+        updateSite();      
+      
+        loadMaterials();      
+    }      
+      
+});      
+      
+function updateSite(){      
+      
+    const val = document.getElementById('site-name').value;      
+      
+    document.getElementById('site-title').innerText =      
+    val || "NO SITE SELECTED";      
+      
+    localStorage.setItem('site_name',val);      
+}      
+      
+function formatDate(dateStr){      
+      
+    if(!dateStr) return "";      
+      
+    const parts = dateStr.split("-");      
+      
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;      
+}      
+      
+function togglePlate(){      
+      
+    const sel = document.getElementById('mat-type');      
+      
+    const isPlate =      
+    sel.options[sel.selectedIndex].dataset.type === "plate";      
+      
+    document.getElementById('plate-div')      
+    .classList.toggle('hidden',!isPlate);      
+}      
+      
+async function uploadImage(file){      
+      
+    document.getElementById('loading').style.display = "flex";      
+      
+    let formData = new FormData();      
+      
+    formData.append("image",file);      
+      
+    try{      
+      
+        const res = await fetch(      
+        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,      
+        {      
+            method:'POST',      
+            body:formData      
+        });      
+      
+        const data = await res.json();      
+      
+        document.getElementById('loading').style.display = "none";      
+      
+        return data.data.url;      
+      
+    }catch(e){      
+      
+        document.getElementById('loading').style.display = "none";      
+      
+        alert("Upload Failed");      
+      
+        return "";      
+    }      
+}      
+      
+async function saveMaterial(){      
+      
+    const date = document.getElementById('mat-date').value;      
+      
+    const area =      
+    document.getElementById('mat-area').value || "General Area";      
+      
+    const direction =      
+    document.getElementById('mat-direction').value;      
+      
+    const sel = document.getElementById('mat-type');      
+      
+    const length =      
+    parseFloat(document.getElementById('mat-length').value);      
+      
+    const qty =      
+    parseFloat(document.getElementById('mat-qty').value) || 1;      
+      
+    const file =      
+    document.getElementById('mat-photo').files[0];      
+      
+    if(!date || !length){      
+        alert("Fill all mandatory fields");      
+        return;      
+    }      
+      
+    let photo = "";      
+      
+    if(file){      
+        photo = await uploadImage(file);      
+    }      
+      
+    let weight = 0;      
+    let size = "";      
+      
+    if(sel.options[sel.selectedIndex].dataset.type === "plate"){      
+      
+        const width =      
+        parseFloat(document.getElementById('mat-width').value);      
+      
+        if(!width){      
+            alert("Enter Width");      
+            return;      
+        }      
+      
+        weight =      
+        ((length/1000)*(width/1000)*parseFloat(sel.value))*qty;      
+      
+        size = length + "x" + width + " mm";      
+      
+    }else{      
+      
+        weight =      
+        ((length/1000)*parseFloat(sel.value))*qty;      
+      
+        size = length + " mm";      
+    }      
+      
+    const data = {      
+      
+        date,      
+        area,      
+        direction,      
+        name:sel.options[sel.selectedIndex].text,      
+        size,      
+        qty,      
+        weight:parseFloat(weight.toFixed(2)),      
+        photo,      
+        uid:auth.currentUser.uid,      
+        ts:Date.now()      
+      
+    };      
+      
+    if(editId){      
+      
+        if(!file){      
+            delete data.photo;      
+        }      
+      
+        await db.collection('materials')      
+        .doc(editId)      
+        .update(data);      
+      
+        editId = null;      
+      
+        document.getElementById('save-btn').innerHTML =      
+        '<i class="fas fa-save"></i> Save Material';      
+      
+    }else{      
+      
+        await db.collection('materials').add(data);      
+    }      
+      
+    document.getElementById('mat-length').value="";      
+    document.getElementById('mat-width').value="";      
+    document.getElementById('mat-photo').value="";      
+    document.getElementById('mat-area').value="";      
+    document.getElementById('mat-direction').value="";      
+    document.getElementById('mat-qty').value="1";      
+      
+    loadMaterials();      
+}      
+      
+async function loadMaterials(){      
+      
+    const snap = await db.collection('materials')      
+    .where('uid','==',auth.currentUser.uid)      
+    .get();      
+      
+    materials = [];      
+      
+    snap.forEach(doc=>{      
+      
+        materials.push({      
+            id:doc.id,      
+            ...doc.data()      
+        });      
+      
+    });      
+      
+    renderMaterials();      
+}      
+      
+function renderMaterials(){      
+      
+    let total = 0;      
+      
+    const grouped = {};      
+      
+    materials.forEach(m=>{      
+      
+        total += m.weight;      
+      
+        if(!grouped[m.area]){      
+            grouped[m.area] = [];      
+        }      
+      
+        grouped[m.area].push(m);      
+      
+    });      
+      
+    document.getElementById('grand-total').innerText =      
+    total.toFixed(2) + " KG";      
+      
+    let html = "";      
+      
+    Object.keys(grouped).sort().forEach(area=>{      
+      
+        html += `      
+        <div class="area-badge">      
+            <i class="fas fa-map-marker-alt"></i>      
+            ${area}      
+        </div>      
+      
+        <table>      
+      
+        <thead>      
+        <tr>      
+        <th>Material</th>      
+        <th>Size</th>      
+        <th>Weight</th>      
+        <th>Photo</th>      
+        <th>Action</th>      
+        </tr>      
+        </thead>      
+      
+        <tbody>      
+        `;      
+      
+        grouped[area].forEach(m=>{      
+      
+            html += `      
+            <tr>      
+      
+            <td>      
+            <strong>${m.name}</strong><br>      
+            ${m.direction || '-'}<br>      
+            <small>${formatDate(m.date)}</small>      
+            </td>      
+      
+            <td>      
+            ${m.size}<br>      
+            Qty:${m.qty}      
+            </td>      
+      
+            <td>      
+            ${m.weight} KG      
+            </td>      
+      
+            <td>      
+      
+            ${m.photo ?      
+      
+            `<a href="${m.photo}"      
+            target="_blank"      
+            class="photo-link">      
+      
+            <img src="${m.photo}" class="preview"><br>      
+      
+            View Photo      
+      
+            </a>`      
+      
+            : '-'}      
+      
+            </td>      
+      
+            <td>      
+      
+            <div class="action-btns">      
+      
+            <button class="btn circle-btn"      
+            onclick="editMaterial('${m.id}')">      
+      
+            <i class="fas fa-pencil-alt"></i>      
+      
+            </button>      
+      
+            <button class="btn-red circle-btn"      
+            onclick="deleteMaterial('${m.id}')">      
+      
+            <i class="fas fa-trash"></i>      
+      
+            </button>      
+      
+            </div>      
+      
+            </td>      
+      
+            </tr>      
+            `;      
+        });      
+      
+        html += `</tbody></table>`;      
+    });      
+      
+    document.getElementById('material-list').innerHTML = html;      
+}      
+      
+function editMaterial(id){      
+      
+    const m = materials.find(x=>x.id===id);      
+      
+    editId = id;      
+      
+    document.getElementById('mat-date').value = m.date;      
+    document.getElementById('mat-area').value = m.area;      
+    document.getElementById('mat-direction').value = m.direction || "";      
+    document.getElementById('mat-qty').value = m.qty;      
+      
+    const sel = document.getElementById('mat-type');      
+      
+    for(let i=0;i<sel.options.length;i++){      
+      
+        if(sel.options[i].text === m.name){      
+            sel.selectedIndex = i;      
+            break;      
+        }      
+    }      
+      
+    togglePlate();      
+      
+    const size = m.size.replace(" mm","");      
+      
+    if(size.includes("x")){      
+      
+        const parts = size.split("x");      
+      
+        document.getElementById('mat-length').value = parts[0];      
+        document.getElementById('mat-width').value = parts[1];      
+      
+    }else{      
+      
+        document.getElementById('mat-length').value = size;      
+        document.getElementById('mat-width').value = "";      
+    }      
+      
+    document.getElementById('save-btn').innerHTML =      
+    '<i class="fas fa-save"></i> Update Material';      
+      
+    window.scrollTo({      
+        top:0,      
+        behavior:'smooth'      
+    });      
+}      
+      
+async function deleteMaterial(id){      
+      
+    if(confirm("Delete this material?")){      
+      
+        await db.collection('materials')      
+        .doc(id)      
+        .delete();      
+      
+        loadMaterials();      
+    }      
+}      
+      
+function generatePDF(){      
+      
+    if(materials.length===0){      
+        alert("No Data");      
+        return;      
+    }      
+      
+    const { jsPDF } = window.jspdf;      
+      
+    const doc = new jsPDF();      
+      
+    const site =      
+    document.getElementById('site-name').value || "Project";      
+      
+    doc.setFontSize(20);      
+    doc.setTextColor(26,115,232);      
+    doc.text("GS MATERIAL REPORT",14,20);      
+      
+    doc.setFontSize(11);      
+    doc.setTextColor(100);      
+      
+    const totalWeight =      
+    document.getElementById('grand-total').innerText;      
+      
+    doc.text(      
+        "Project : " + site +      
+        " | Total Weight : " + totalWeight,      
+        14,      
+        28      
+    );      
+      
+    let y = 40;      
+      
+    const grouped = {};      
+      
+    materials.forEach(m=>{      
+      
+        if(!grouped[m.area]){      
+            grouped[m.area] = [];      
+        }      
+      
+        grouped[m.area].push([      
+            formatDate(m.date),      
+            m.direction || '-',      
+            m.name,      
+            m.size,      
+            m.qty,      
+            m.weight.toFixed(2) + " KG"      
+        ]);      
+    });      
+      
+    Object.keys(grouped).sort().forEach(area=>{      
+      
+        if(y > 240){      
+            doc.addPage();      
+            y = 20;      
+        }      
+      
+        doc.setFontSize(13);      
+      
+        doc.text("AREA : " + area,14,y);      
+      
+        doc.autoTable({      
+      
+            startY:y+3,      
+      
+            head:[[      
+                'Date',      
+                'Direction',      
+                'Material',      
+                'Size',      
+                'Qty',      
+                'Weight'      
+            ]],      
+      
+            body:grouped[area],      
+      
+            foot:[[      
+                '',      
+                '',      
+                '',      
+                '',      
+                'TOTAL',      
+                grouped[area]      
+                .reduce((sum,row)=>sum + parseFloat(row[5]),0)      
+                .toFixed(2) + " KG"      
+            ]],      
+      
+            theme:'grid',      
+      
+            headStyles:{      
+                fillColor:[26,115,232]      
+            },      
+      
+            footStyles:{      
+                fillColor:[15,157,88],      
+                textColor:[255,255,255],      
+                fontStyle:'bold'      
+            },      
+      
+            styles:{      
+                fontSize:8      
+            }      
+      
+        });      
+      
+        y = doc.lastAutoTable.finalY + 15;      
+    });      
+      
+    const summary = {};      
+      
+    materials.forEach(m=>{      
+      
+        if(!summary[m.name]){      
+            summary[m.name] = 0;      
+        }      
+      
+        summary[m.name] += m.weight;      
+    });      
+      
+    const summaryBody = [];      
+      
+    Object.keys(summary).sort().forEach(name=>{      
+      
+        summaryBody.push([      
+            name,      
+            summary[name].toFixed(2) + " KG"      
+        ]);      
+      
+    });      
+      
+    if(y > 220){      
+        doc.addPage();      
+        y = 20;      
+    }      
+      
+    doc.setFontSize(15);      
+      
+    doc.setTextColor(26,115,232);      
+      
+    doc.text("MATERIAL SUMMARY",14,y);      
+      
+    doc.autoTable({      
+      
+        startY:y+5,      
+      
+        head:[[      
+            'Material Name',      
+            'Total Weight'      
+        ]],      
+      
+        body:summaryBody,      
+      
+        foot:[[      
+            'GRAND TOTAL',      
+            totalWeight      
+        ]],      
+      
+        theme:'grid',      
+      
+        headStyles:{      
+            fillColor:[21,101,192]      
+        },      
+      
+        footStyles:{      
+            fillColor:[15,157,88],      
+            textColor:[255,255,255],      
+            fontStyle:'bold'      
+        }      
+      
+    });      
+      
+    doc.save(site + "_Material_Report.pdf");      
+}      
+      
+</script>      
+      
+</body>      
 </html>
