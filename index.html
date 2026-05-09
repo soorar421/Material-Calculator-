@@ -163,8 +163,8 @@
                     <div class="title"><i class="fas fa-box"></i> Material Entry</div>
                     <input type="date" id="mat-date">
                     <div class="flex">
-                        <input type="text" id="mat-area" placeholder="Area Name">
-                        <select id="mat-direction">
+                        <input type="text" id="mat-area" placeholder="Area Name" oninput="localStorage.setItem('mat_area', this.value)">
+                        <select id="mat-direction" onchange="localStorage.setItem('mat_direction', this.value)">
                             <option value="">Direction</option>
                             <option>North</option>
                             <option>South</option>
@@ -253,6 +253,11 @@
                 document.getElementById('user-name').innerText = "Active User : " + user.displayName;
                 document.getElementById('mat-date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('site-name').value = localStorage.getItem('site_name') || "";
+                
+                // Load saved Area and Direction
+                document.getElementById('mat-area').value = localStorage.getItem('mat_area') || "";
+                document.getElementById('mat-direction').value = localStorage.getItem('mat_direction') || "";
+                
                 updateSite();
                 loadMaterials();
             }
