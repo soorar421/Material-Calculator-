@@ -163,8 +163,8 @@
                     <div class="title"><i class="fas fa-box"></i> Material Entry</div>
                     <input type="date" id="mat-date">
                     <div class="flex">
-                        <input type="text" id="mat-area" placeholder="Area Name" oninput="localStorage.setItem('mat_area', this.value)">
-                        <select id="mat-direction" onchange="localStorage.setItem('mat_direction', this.value)">
+                        <input type="text" id="mat-area" placeholder="Area Name" oninput="saveAreaState()">
+                        <select id="mat-direction" onchange="saveAreaState()">
                             <option value="">Direction</option>
                             <option>North</option>
                             <option>South</option>
@@ -178,7 +178,9 @@
                     <select id="mat-type" onchange="togglePlate()">
                         <optgroup label="Beams">
                             <option value="61.5" data-type="linear">ISMB 400 (61.5 kg/m)</option>
+                            <option value="52.4" data-type="linear">ISMB 350 (52.4 kg/m)</option>
                             <option value="46" data-type="linear">ISMB 300 (46 kg/m)</option>
+                            <option value="37.3" data-type="linear">ISMB 250 (37.3 kg/m)</option>
                         </optgroup>
                         <optgroup label="Channels">
                             <option value="22.3" data-type="linear">ISMC 200 (22.3 kg/m)</option>
@@ -252,9 +254,9 @@
                 document.getElementById('main').classList.remove('hidden');
                 document.getElementById('user-name').innerText = "Active User : " + user.displayName;
                 document.getElementById('mat-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('site-name').value = localStorage.getItem('site_name') || "";
                 
-                // Load saved Area and Direction
+                // Load saved states from localStorage
+                document.getElementById('site-name').value = localStorage.getItem('site_name') || "";
                 document.getElementById('mat-area').value = localStorage.getItem('mat_area') || "";
                 document.getElementById('mat-direction').value = localStorage.getItem('mat_direction') || "";
                 
@@ -267,6 +269,11 @@
             const val = document.getElementById('site-name').value;
             document.getElementById('site-title').innerText = val || "NO SITE SELECTED";
             localStorage.setItem('site_name', val);
+        }
+
+        function saveAreaState() {
+            localStorage.setItem('mat_area', document.getElementById('mat-area').value);
+            localStorage.setItem('mat_direction', document.getElementById('mat-direction').value);
         }
 
         function formatDate(dateStr) {
@@ -342,11 +349,15 @@
                 await db.collection('materials').add(data);
             }
 
-            // Area and Direction are NOT cleared here
+            // Save the Area and Direction to localStorage to ensure they persist
+            saveAreaState();
+
+            // Resetting specific fields - Area and Direction stay as they are
             document.getElementById('mat-length').value = "";
             document.getElementById('mat-width').value = "";
             document.getElementById('mat-photo').value = "";
             document.getElementById('mat-qty').value = "1";
+            
             loadMaterials();
         }
 
